@@ -24,9 +24,13 @@ ENTRY = (
 )
 
 # Gate: /output/entry.txt must be UTF-8 text of 1 to 200 characters,
-# not only white space. Refuse to write anything that would fail it.
+# not only white space, and exactly one sentence. Refuse to write anything
+# that would fail it.
 assert 1 <= len(ENTRY.strip()) <= 200, "entry must be 1-200 characters"
 assert ENTRY.strip(), "entry must not be only white space"
+assert ENTRY.count(".") == 1 and ENTRY.endswith("."), (
+    "entry must be exactly one sentence"
+)
 
 
 def main() -> None:
@@ -34,6 +38,8 @@ def main() -> None:
     out.parent.mkdir(parents=True, exist_ok=True)
     # No trailing newline: the gate counts every character.
     out.write_text(ENTRY, encoding="utf-8")
+    # Self-check: what landed on disk must be byte-identical to the entry.
+    assert out.read_text(encoding="utf-8") == ENTRY, "written entry differs"
 
 
 if __name__ == "__main__":
